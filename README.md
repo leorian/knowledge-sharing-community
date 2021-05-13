@@ -4,8 +4,7 @@ qq:1573623031
 微信：leorain201314
 #### 介绍
 知识分享社区集成论坛，博客，应用分发于一体的简易社区系统，支持第三方登录
-
-![输入图片说明](https://images.gitee.com/uploads/images/2021/0513/095015_d7693d46_381412.png "15.png")
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0513/095616_a93b591b_381412.png "16.png")
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0513/093859_5136ef6b_381412.png "1.png")
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0513/093932_afb431d0_381412.png "2.png")
 ![输入图片说明](https://images.gitee.com/uploads/images/2021/0513/094221_6474c508_381412.png "3.png")
