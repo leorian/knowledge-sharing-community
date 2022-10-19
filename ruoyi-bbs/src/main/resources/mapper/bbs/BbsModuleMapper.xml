@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsModuleMapper">
+
+    <resultMap type="BbsModule" id="BbsModuleResult">
+        <id property="moduleId" column="module_id"/>
+        <result property="moduleTitle" column="module_title"/>
+        <result property="icon" column="icon"/>
+        <result property="blockId" column="block_id"/>
+        <result property="sequence" column="sequence"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="topicCount" column="topic_count"/>
+        <result property="goodTopicCount" column="good_topic_count"/>
+        <result property="forumCount" column="forum_count"/>
+        <result property="lastUpdateTime" column="last_update_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectModuleVo">
+        select module_id, module_title,icon, block_id, sequence, status, del_flag,
+        topic_count, good_topic_count, forum_count, last_update_time,
+        create_by, create_time, update_by, update_time, remark
+		from bbs_module
+    </sql>
+
+    <select id="selectModuleList" parameterType="BbsModule" resultMap="BbsModuleResult">
+        <include refid="selectModuleVo"/>
+        <where>
+            del_flag = 0
+
+            <if test="blockId != null">
+                AND block_id = #{blockId}
+            </if>
+
+            <if test="moduleTitle != null and moduleTitle != ''">
+                AND module_title like concat('%', #{moduleTitle}, '%')
+            </if>
+
+        </where>
+        order by sequence asc
+    </select>
+
+    <select id="statisticsModuleList" parameterType="BbsModule" resultMap="BbsModuleResult">
+       SELECT
+        module_id,
+        count( topic_id ) AS topic_count,
+        max( create_time ) AS last_update_time,
+        count( CASE WHEN topic_type = 1 THEN 1 END ) AS good_topic_count
+       FROM
+	    bbs_topic
+       GROUP BY
+	    module_id;
+    </select>
+
+    <select id="statisticsModuleForumList" parameterType="BbsModule" resultMap="BbsModuleResult">
+        SELECT
+            bt.module_id AS module_id,
+            count( bf.forum_id ) AS forum_count
+        FROM
+            bbs_forum bf
+            INNER JOIN bbs_topic bt ON bf.topic_id = bt.topic_id
+        GROUP BY
+            bt.module_id
+    </select>
+
+    <insert id="insertModule" parameterType="BbsModule">
+        insert into bbs_module (
+        <if test="moduleTitle != null and moduleTitle != '' ">module_title,</if>
+        <if test="icon != null and icon != '' ">icon,</if>
+        <if test="blockId != null">block_id,</if>
+        <if test="sequence != null ">sequence,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="lastUpdateTime != null">last_update_time,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="moduleTitle != null and moduleTitle != '' ">#{moduleTitle},</if>
+        <if test="icon != null and icon != '' ">#{icon},</if>
+        <if test="blockId != null ">#{blockId},</if>
+        <if test="sequence != null ">#{sequence},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="lastUpdateTime != null">#{lastUpdateTime},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectModuleById" parameterType="Long" resultMap="BbsModuleResult">
+        <include refid="selectModuleVo"/>
+        where module_id = #{moduleId}
+    </select>
+
+    <update id="updateModule" parameterType="BbsModule">
+        update bbs_module
+        <set>
+            <if test="moduleTitle != null and moduleTitle != ''">module_title = #{moduleTitle},</if>
+            <if test="icon != null and icon != '' ">icon = #{icon},</if>
+            <if test="blockId != null ">block_id = #{blockId},</if>
+            <if test="sequence != null ">sequence = #{sequence},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where module_Id = #{moduleId}
+    </update>
+
+    <delete id="deleteModuleByIds" parameterType="String">
+        update bbs_module set del_flag = 1 where module_id in
+        <foreach item="moduleId" collection="array" open="(" separator="," close=")">
+            #{moduleId}
+        </foreach>
+    </delete>
+
+    <select id="getModuleIdListByBlockId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT module_id from bbs_module where block_id = #{blockId}
+    </select>
+
+</mapper>

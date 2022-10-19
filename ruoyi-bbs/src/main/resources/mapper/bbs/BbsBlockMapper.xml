@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsBlockMapper">
+    <resultMap type="BbsBlock" id="BbsBlockResult">
+        <id property="blockId" column="block_id"/>
+        <result property="blockTitle" column="block_title"/>
+        <result property="sequence" column="sequence"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectBlockVo">
+        select block_id, block_title, sequence, status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_block
+    </sql>
+
+    <select id="selectBlockList" parameterType="BbsBlock" resultMap="BbsBlockResult">
+        <include refid="selectBlockVo"/>
+        <where>
+            del_flag = 0
+            <if test="blockTitle != null and blockTitle != ''">
+                AND block_title like concat('%', #{blockTitle}, '%')
+            </if>
+            <if test="blockId != null">
+                AND block_id = #{blockId}
+            </if>
+
+        </where>
+        order by sequence asc
+    </select>
+
+    <insert id="insertBlock" parameterType="BbsBlock">
+        insert into bbs_block (
+        <if test="blockTitle != null and blockTitle != '' ">block_title,</if>
+        <if test="sequence != null ">sequence,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="blockTitle != null and blockTitle != '' ">#{blockTitle},</if>
+        <if test="sequence != null ">#{sequence},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectBlockById" parameterType="Long" resultMap="BbsBlockResult">
+        <include refid="selectBlockVo"/>
+        where block_id = #{blockId}
+    </select>
+
+    <update id="updateBlock" parameterType="BbsBlock">
+        update bbs_block
+        <set>
+            <if test="blockTitle != null and blockTitle != ''">block_title = #{blockTitle},</if>
+            <if test="sequence != null ">sequence = #{sequence},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where block_id = #{blockId}
+    </update>
+
+    <delete id="deleteBlockByIds" parameterType="String">
+        update bbs_block set del_flag = 1 where block_id in
+        <foreach item="blockId" collection="array" open="(" separator="," close=")">
+            #{blockId}
+        </foreach>
+    </delete>
+</mapper>

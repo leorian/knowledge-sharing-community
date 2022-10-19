@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsForumMapper">
+    <resultMap type="BbsForum" id="BbsForumResult">
+        <id property="forumId" column="forum_id"/>
+        <result property="topicId" column="topic_id"/>
+        <result property="topicTitle" column="topic_title"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="account" column="account"/>
+        <result property="forumContent" column="forum_content"/>
+        <result property="forumTime" column="forum_time"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectForumVo">
+        select forum_id, topic_id, topic_title, user_id, user_name, account,
+        forum_content, forum_time,
+        status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_forum
+    </sql>
+
+    <select id="selectForumList" parameterType="BbsForum" resultMap="BbsForumResult">
+        <include refid="selectForumVo"/>
+        <where>
+            del_flag = 0
+            <if test="topicId != null">
+                AND topic_id = #{topicId}
+            </if>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="account != null and account != ''">
+                AND account like concat('%', #{account}, '%')
+            </if>
+            <if test="topicTitle != null and topicTitle != ''">
+                AND topic_title like concat('%', #{topicTitle}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertForum" parameterType="BbsForum">
+        insert into bbs_forum (
+        <if test="topicId != null ">topic_id,</if>
+        <if test="topicTitle != null and topicTitle != '' ">topic_title,</if>
+        <if test="userId != null ">user_id,</if>
+        <if test="userName != null and userName != '' ">user_name,</if>
+        <if test="account != null and account != '' ">account,</if>
+        <if test="forumContent != null and forumContent != '' ">forum_content,</if>
+        <if test="forumTime != null">forum_time,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="topicId != null ">#{topicId},</if>
+        <if test="topicTitle != null and topicTitle != ''">#{topicTitle},</if>
+        <if test="userId != null ">#{userId},</if>
+        <if test="userName != null and userName != '' ">#{userName},</if>
+        <if test="account != null and account != '' ">#{account},</if>
+        <if test="forumContent != null and forumContent != '' ">#{forumContent},</if>
+        <if test="forumTime != null">#{forumTime},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <delete id="deleteForumByIds" parameterType="String">
+        update bbs_forum set del_flag = 1 where forum_id in
+        <foreach item="forumId" collection="array" open="(" separator="," close=")">
+            #{forumId}
+        </foreach>
+    </delete>
+
+    <select id="getForumCount" resultType="java.lang.Long">
+        select count(forum_id) from bbs_forum
+    </select>
+
+</mapper>

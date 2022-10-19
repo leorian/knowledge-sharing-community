@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('修改论坛版块')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-block-edit" th:object="${block}">
+        <input id="blockId" name="blockId" th:field="*{blockId}" type="hidden">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">版块标题：</label>
+            <div class="col-sm-10">
+                <input id="blockTitle" name="blockTitle" th:field="*{blockTitle}" class="form-control" type="text"
+                       required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">版块顺序：</label>
+            <div class="col-sm-10">
+                <input id="sequence" name="sequence" th:field="*{sequence}" class="form-control" type="number" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">公告状态：</label>
+            <div class="col-sm-10">
+                <div class="radio-box">
+                    <input type="radio" id="status_0" name="status" value="0" th:field="*{status}">
+                    <label for="status_0">正常</label>
+                </div>
+                <div class="radio-box">
+                    <input type="radio" id="status_1" name="status" value="1" th:field="*{status}">
+                    <label for="status_1">关闭</label>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+    var prefix = ctx + "bbs/block";
+    $("#form-block-edit").validate({
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.save(prefix + "/edit", $('#form-block-edit').serialize());
+        }
+    }
+</script>
+</body>
+</html>

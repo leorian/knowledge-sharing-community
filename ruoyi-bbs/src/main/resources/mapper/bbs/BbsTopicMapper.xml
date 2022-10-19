@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsTopicMapper">
+    <resultMap type="BbsTopic" id="BbsTopicResult">
+        <id property="topicId" column="topic_id"/>
+        <result property="topicTitle" column="topic_title"/>
+        <result property="topicType" column="topic_type"/>
+        <result property="topicImage" column="topic_image"/>
+        <result property="tag" column="tag"/>
+        <result property="publicContent" column="public_content"/>
+        <result property="privateContent" column="private_content"/>
+        <result property="moduleId" column="module_id"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="tagCount" column="tag_count"/>
+    </resultMap>
+
+    <sql id="selectTopicVo">
+        select topic_id, topic_title,topic_type, topic_image, tag, public_content, private_content,
+        module_id, status, del_flag, view_count, comment_count,
+        create_by, create_time, update_by, update_time, remark
+		from bbs_topic
+    </sql>
+
+    <select id="selectTopicList" parameterType="BbsTopic" resultMap="BbsTopicResult">
+        <include refid="selectTopicVo"/>
+        <where>
+            del_flag = 0
+
+            <if test="moduleId != null">
+                AND module_id = #{moduleId}
+            </if>
+
+            <if test="topicTitle != null and topicTitle != ''">
+                AND topic_title like concat('%', #{topicTitle}, '%')
+            </if>
+
+            <if test="moduleIdList != null and moduleIdList.size() > 0 ">
+                AND module_id IN
+                <foreach collection="moduleIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
+        </where>
+    </select>
+
+    <insert id="insertTopic" parameterType="BbsTopic">
+        insert into bbs_topic (
+        <if test="topicTitle != null and topicTitle != '' ">topic_title,</if>
+        <if test="topicType != null ">topic_type,</if>
+        <if test="topicImage != null and topicImage != '' ">topic_image,</if>
+        <if test="tag != null and tag != '' ">tag,</if>
+        <if test="publicContent != null and publicContent != '' ">public_content,</if>
+        <if test="privateContent != null and privateContent != '' ">private_content,</if>
+        <if test="moduleId != null ">module_id,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="topicTitle != null and topicTitle != '' ">#{topicTitle},</if>
+        <if test="topicType != null ">#{topicType},</if>
+        <if test="topicImage != null ">#{topicImage},</if>
+        <if test="tag != null and tag != '' ">#{tag},</if>
+        <if test="publicContent != null and publicContent != '' ">#{publicContent},</if>
+        <if test="privateContent != null and privateContent != '' ">#{privateContent},</if>
+        <if test="moduleId != null ">#{moduleId},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectTopicById" parameterType="Long" resultMap="BbsTopicResult">
+        <include refid="selectTopicVo"/>
+        where topic_id = #{topicId}
+    </select>
+
+    <update id="updateTopic" parameterType="BbsTopic">
+        update bbs_topic
+        <set>
+            <if test="topicTitle != null and topicTitle != ''">topic_title = #{topicTitle},</if>
+            <if test="moduleId != null">module_id = #{moduleId},</if>
+            <if test="tag != null and tag != '' ">tag = #{tag},</if>
+            <if test="topicType != null ">topic_type = #{topicType},</if>
+            <if test="topicImage != null and topicImage != '' ">topic_image = #{topicImage},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="publicContent != null and publicContent != '' ">public_content = #{publicContent},</if>
+            <if test="privateContent != null and privateContent != '' ">private_content = #{privateContent},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where topic_id = #{topicId}
+    </update>
+
+
+    <delete id="deleteTopicByIds" parameterType="String">
+        update bbs_topic set del_flag = 1 where topic_id in
+        <foreach item="topicId" collection="array" open="(" separator="," close=")">
+            #{topicId}
+        </foreach>
+    </delete>
+
+
+    <!-- 分页获取主题列表 -->
+    <select id="findList" parameterType="Map" resultMap="BbsTopicResult">
+        select topic_id, tag, topic_title, topic_type, comment_count, create_time, create_by, topic_image
+        from bbs_topic where del_flag = 0
+        <if test="moduleId != null">
+            AND module_id = #{moduleId}
+        </if>
+        <if test="tag != null and tag != ''">
+            AND tag = #{tag}
+        </if>
+        <if test="title != null and title !=''">
+            AND topic_title like concat('%', #{title}, '%')
+        </if>
+        <if test="moduleIdList != null and moduleIdList.size() > 0 ">
+            AND module_id IN
+            <foreach collection="moduleIdList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="offset != null and pageSize != null">
+            limit #{offset},#{pageSize}
+        </if>
+    </select>
+    <!-- 获取符合结果的总记录数 -->
+    <select id="getTotal" parameterType="Map" resultType="Integer">
+        select count(*) from bbs_topic where del_flag = 0
+        <if test="moduleId != null">
+            AND module_id = #{moduleId}
+        </if>
+        <if test="tag != null and tag != ''">
+            AND tag = #{tag}
+        </if>
+        <if test="title != null and title !=''">
+            AND topic_title like concat('%', #{title}, '%')
+        </if>
+        <if test="moduleIdList != null and moduleIdList.size() > 0 ">
+            AND module_id IN
+            <foreach collection="moduleIdList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="statisticsForumList" parameterType="java.util.List" resultMap="BbsTopicResult">
+        SELECT
+        topic_id,
+        count( forum_id ) AS comment_count
+        FROM
+        bbs_forum
+        <where>
+            del_flag = 0
+            <if test="list != null and list.size() > 0 ">
+                AND topic_id IN
+                <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+        topic_id;
+    </select>
+
+    <select id="newsTopicTop5" resultMap="BbsTopicResult">
+        SELECT
+	      topic_id,
+	      topic_type,
+	      topic_title,
+	      topic_image,
+	      create_time
+        FROM
+	      bbs_topic
+        ORDER BY
+	      create_time DESC  limit 0, 8;
+    </select>
+
+    <select id="newCommentTopicTop5" resultMap="BbsTopicResult">
+        SELECT
+            topic_id,
+            topic_title,
+            create_time
+        FROM
+	        bbs_forum
+        ORDER BY
+	        create_time DESC limit 0, 8;
+    </select>
+
+    <select id="hotTopicTop5" resultMap="BbsTopicResult">
+        SELECT
+            topic_id,
+            topic_type,
+            topic_title,
+	        create_time
+        FROM
+            bbs_topic
+        WHERE
+            topic_type = 1
+            OR topic_type = 2
+        ORDER BY
+            topic_type DESC,
+            create_time DESC limit 0, 8;
+    </select>
+
+    <select id="tagCount" parameterType="java.lang.Long" resultMap="BbsTopicResult">
+        select tag, count(topic_id) as tag_count from bbs_topic where module_id = #{moduleId} group by tag;
+    </select>
+
+</mapper>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('论坛帖子列表')"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="notice-form">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            主题标题：<input type="text" name="topicTitle"/>
+                        </li>
+                        <li>
+                            用户名称：<input type="text" name="userName"/>
+                        </li>
+                        <li>
+                            账号：<input type="text" name="account"/>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <!--   <a class="btn btn-success" onclick="$.operate.addFull()" shiro:hasPermission="bbs:forum:add">
+                   <i class="fa fa-plus"></i> 新增
+               </a>
+               <a class="btn btn-primary single disabled" onclick="$.operate.editFull()"
+                  shiro:hasPermission="bbs:forum:edit">
+                   <i class="fa fa-edit"></i> 修改
+               </a>-->
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+               shiro:hasPermission="bbs:forum:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+        </div>
+
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table" data-mobile-responsive="true"></table>
+        </div>
+
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<script th:inline="javascript">
+    // var editFlag = [[${@permission.hasPermi('bbs:forum:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('bbs:forum:remove')}]];
+
+    var prefix = ctx + "bbs/forum";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            // createUrl: prefix + "/add",
+            // updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            modalName: "论坛帖子",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'forumId',
+                    title: '序号'
+                },
+                {
+                    field: 'topicId',
+                    title: '主题ID'
+                },
+                {
+                    field: 'topicTitle',
+                    title: '主题标题'
+                },
+                {
+                    field: 'userId',
+                    title: '用户ID'
+                },
+                {
+                    field: 'userName',
+                    title: '用户名称'
+                },
+                {
+                    field: 'account',
+                    title: '账号',
+                    align: 'center'
+                },
+                {
+                    field: 'forumContent',
+                    title: '帖子内容'
+                },
+                {
+                    field: 'forumTime',
+                    title: '发帖时间'
+                },
+                {
+                    field: 'status',
+                    title: '状态',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        if (value === 0) {
+                            //正常
+                            actions.push("<span class=\"badge badge-primary\">正常</span>");
+                        } else {
+                            //关闭
+                            actions.push("<span class=\"badge badge-danger\">关闭</span>");
+                        }
+                        return actions.join('');
+                    }
+                },
+                {
+                    field: 'createBy',
+                    title: '创建者'
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间',
+                    sortable: true
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        // actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.editFull(\'' + row.forumId + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.forumId + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+</script>
+</body>
+</html>

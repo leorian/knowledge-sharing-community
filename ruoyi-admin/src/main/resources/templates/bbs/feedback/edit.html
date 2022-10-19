@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('编辑论坛内容')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: summernote-css"/>
+</head>
+<body>
+<div class="form-content">
+    <form id="form-feedback-edit" name="form-feedback-edit" class="form-horizontal" th:object="${feedback}">
+        <input id="feedbackId" name="feedbackId" th:field="*{feedbackId}" type="hidden">
+        <h4 class="form-header h4">基本信息</h4>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"><span style="color: red; ">*</span>反馈内容：</label>
+                    <div class="col-sm-10">
+                        <input name="feedbackContent" th:field="*{feedbackContent}" disabled placeholder="请输入反馈内容" class="form-control" type="text" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"><span style="color: red; ">*</span>社区回复：</label>
+                        <div class="col-sm-10">
+                            <textarea name="feedbackAnswer" th:field="*{feedbackAnswer}" placeholder="请输入社区回复" class="form-control" type="text" required></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="row">
+    <div class="col-sm-offset-5 col-sm-10">
+        <button type="button" class="btn btn-sm btn-primary" onclick="submitHandler()"><i class="fa fa-check"></i>保 存
+        </button>&nbsp;
+        <button type="button" class="btn btn-sm btn-danger" onclick="closeItem()"><i class="fa fa-reply-all"></i>关 闭
+        </button>
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: summernote-js"/>
+<script>
+    var prefix = ctx + "bbs/feedback";
+
+    $("#form-feedback-edit").validate({
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            $.operate.saveTab(prefix + "/edit", $('#form-feedback-edit').serialize());
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('新增应用')"/>
+    <th:block th:include="include :: select2-css"/>
+    <th:block th:include="include :: summernote-css"/>
+    <style type="text/css">
+        .progress {
+            width: 600px;
+            height: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin: 10px 0px;
+            overflow: hidden;
+        }
+        .progress_text {
+            margin: 10px 5px;
+            height: 10px;
+            line-height: 10px;
+        }
+
+        /* 初始状态设置进度条宽度为0px */
+        .progress > div {
+            width: 0px;
+            height: 100%;
+            background-color: yellowgreen;
+            transition: all .3s ease;
+        }
+    </style>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+    <form class="form-horizontal m" id="form-app-add" name="formAppAdd">
+        <div class="form-group">
+            <label class="col-sm-2 control-label">应用名称：</label>
+            <div class="col-sm-10">
+                <input id="appName" name="appName" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">应用版本：</label>
+            <div class="col-sm-10">
+                <input id="appVersion" name="appVersion" class="form-control" type="text" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">应用图标：</label>
+            <div class="col-sm-10">
+                <input type="file" name="appIcon" id="appIcon" class="file-control" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">安装包：</label>
+            <div class="col-sm-10">
+                <input type="file" name="downloadUrl" id="downloadUrl" class="file-control" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">应用简介：</label>
+            <div class="col-sm-10">
+                <input id="introduction" name="introduction" type="hidden">
+                <div class="introduction"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">应用状态：</label>
+            <div class="col-sm-10">
+                <div class="radio-box">
+                    <input type="radio" id="status_0" name="status" value="0" checked="checked">
+                    <label for="status_0">正常</label>
+                </div>
+                <div class="radio-box">
+                    <input type="radio" id="status_1" name="status" value="1">
+                    <label for="status_1">关闭</label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-2 control-label">上传进度：</div>
+            <div class="col-sm-10">
+                <div class="progress pull-left">
+                    <div></div>
+                </div>
+                <div class="progress_text pull-left">
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<th:block th:include="include :: footer"/>
+<th:block th:include="include :: select2-js"/>
+<th:block th:include="include :: summernote-js"/>
+<script type="text/javascript">
+
+    $('.introduction').summernote({
+        placeholder: '请输入应用简介',
+        height: 192,
+        lang: 'zh-CN',
+        followingToolbar: false,
+        callbacks: {
+            onImageUpload: function (files) {
+                sendFile(files[0], this);
+            }
+        }
+    });
+
+    // 上传文件
+    function sendFile(file, obj) {
+        var data = new FormData();
+        data.append("file", file);
+        $.ajax({
+            type: "POST",
+            url: ctx + "common/upload",
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function (result) {
+                if (result.code == web_status.SUCCESS) {
+                    $(obj).summernote('editor.insertImage', result.url, result.fileName);
+                } else {
+                    $.modal.alertError(result.msg);
+                }
+            },
+            error: function (error) {
+                $.modal.alertWarning("图片上传失败。");
+            }
+        });
+    }
+
+    var prefix = ctx + "bbs/app";
+    $("#form-app-add").validate({
+        focusCleanup: true
+    });
+
+    function submitHandler() {
+        if ($.validate.form()) {
+            //$.operate.save(prefix + "/add", $('#form-app-add').serialize());
+            var appName = document.formAppAdd.appName.value;
+            var appVersion = document.formAppAdd.appVersion.value;
+            var appIcon = document.formAppAdd.appIcon.files[0];
+            var downloadUrl = document.formAppAdd.downloadUrl.files[0];
+            var introduction = $('.introduction').summernote('code');
+            var status = document.formAppAdd.status.value;
+            var data = new FormData();
+            data.append("appVersion", appVersion);
+            data.append("appName", appName);
+            data.append("appIcon", appIcon);
+            data.append("downloadUrl", downloadUrl);
+            data.append("introduction", introduction);
+            data.append("status", status);
+            $.ajax({
+                type: "POST",
+                url: prefix + "/add",
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                beforeSend: function () {
+                    $.modal.loading("正在处理中，请稍后...");
+                    $.modal.disable();
+                },
+                success: function (result) {
+                    if (result.code == web_status.SUCCESS) {
+                        // $(obj).summernote('editor.insertImage', result.url, result.fileName);
+                        $.operate.successCallback(result);
+                    } else {
+                        $.modal.alertError(result.msg);
+                    }
+                },
+                error: function (error) {
+                    $.modal.alertWarning("图片上传失败。");
+                },
+                xhr: function () {
+                    var xhr = new XMLHttpRequest();
+                    //使用XMLHttpRequest.upload监听上传过程，注册progress事件，打印回调函数中的event事件
+                    xhr.upload.addEventListener('progress', function (e) {
+                        console.log(e);
+                        //loaded代表上传了多少
+                        //total代表总数为多少
+                        var progressRate = (e.loaded / e.total) * 100 + '%';
+
+                        //通过设置进度条的宽度达到效果
+                        $('.progress > div').css('width', progressRate);
+                        $(".progress_text").text(progressRate);
+                    });
+
+                    return xhr;
+                }
+            });
+        }
+    }
+</script>
+</body>
+</html>

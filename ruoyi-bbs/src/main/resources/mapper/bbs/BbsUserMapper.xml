@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsUserMapper">
+    <resultMap type="BbsUser" id="BbsUserResult">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userImage" column="user_image"/>
+        <result property="account" column="account"/>
+        <result property="password" column="password"/>
+        <result property="sex" column="sex"/>
+        <result property="birthday" column="birthday"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="email" column="email"/>
+        <result property="qq" column="qq"/>
+        <result property="userType" column="user_type"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectUserVo">
+        select user_id, user_name, user_image, account, password, sex, birthday,
+         phone_number, email, qq, user_type,
+         status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_user
+    </sql>
+
+    <select id="selectUserList" parameterType="BbsUser" resultMap="BbsUserResult">
+        <include refid="selectUserVo"/>
+        <where>
+            del_flag = 0
+            <if test="userName != null and userName != ''">
+                AND user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="account != null and account != ''">
+                AND account like concat('%', #{account}, '%')
+            </if>
+            <if test="email != null and email != ''">
+                AND email like concat('%', #{email}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertUser" parameterType="BbsUser">
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="userId">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into bbs_user (
+        <if test="userName != null and userName != '' ">user_name,</if>
+        <if test="userImage != null and userImage != '' ">user_image,</if>
+        <if test="account != null and account != '' ">account,</if>
+        <if test="password != null and password != '' ">password,</if>
+        <if test="email != null and email != '' ">email,</if>
+        <if test="sex != null ">sex,</if>
+        <if test="userType != null">user_type,</if>
+        <if test="birthday != null">birthday,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="userName != null and userName != '' ">#{userName},</if>
+        <if test="userImage != null and userImage != ''">#{userImage},</if>
+        <if test="account != null and account != '' ">#{account},</if>
+        <if test="password != null and password != '' ">#{password},</if>
+        <if test="email != null and email != '' ">#{email},</if>
+        <if test="sex != null ">#{sex},</if>
+        <if test="userType != null">#{userType},</if>
+        <if test="birthday != null">#{birthday},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectUserById" parameterType="Long" resultMap="BbsUserResult">
+        <include refid="selectUserVo"/>
+        where user_id = #{userId}
+    </select>
+
+    <select id="selectUserByAccount" parameterType="BbsUser" resultMap="BbsUserResult">
+        <include refid="selectUserVo"/>
+        where del_flag = 0 and status = 0 and ( account = #{account} or email = #{email} )
+    </select>
+
+    <update id="updateUser" parameterType="BbsUser">
+        update bbs_user
+        <set>
+            <if test="userName != null and userName != ''">user_name = #{userName},</if>
+            <if test="userImage != null and userImage != '' ">user_image = #{userImage},</if>
+            <if test="account != null and account != ''">account = #{account},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="userType != null">user_type = #{userType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteUserByIds" parameterType="String">
+        update bbs_user set del_flag = 1 where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+    <select id="getUserCount" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        select count(user_Id) from bbs_user
+        where user_type = #{userType}
+    </select>
+
+</mapper>

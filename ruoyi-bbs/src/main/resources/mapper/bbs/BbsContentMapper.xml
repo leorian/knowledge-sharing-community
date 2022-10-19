@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsContentMapper">
+    <resultMap type="BbsContent" id="BbsContentResult">
+        <id property="contentId" column="content_id"/>
+        <result property="contentType" column="content_type"/>
+        <result property="contentTitle" column="content_title"/>
+        <result property="publicContent" column="public_content"/>
+        <result property="privateContent" column="private_content"/>
+        <result property="mainImage" column="main_image"/>
+        <result property="tags" column="tags"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+
+    <sql id="selectContentVo">
+        select content_id, content_type, content_title, main_image, tags,
+         status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_content
+    </sql>
+
+    <sql id="selectContentVo2">
+        select content_id, content_type, content_title, main_image, tags,
+        public_content,private_content,
+         status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_content
+    </sql>
+
+    <select id="selectContentList" parameterType="BbsContent" resultMap="BbsContentResult">
+        <include refid="selectContentVo"/>
+        <where>
+            del_flag = 0
+            <if test="contentTitle != null and contentTitle != ''">
+                AND content_title like concat('%', #{contentTitle}, '%')
+            </if>
+            <if test="contentType != null and contentType !=''">
+                AND content_type = #{contentType}
+            </if>
+            <if test="tags != null and tags != ''">
+                AND tags like concat('%', #{tags}, '%')
+            </if>
+        </where>
+    </select>
+
+    <insert id="insertContent" parameterType="BbsContent">
+        insert into bbs_content (
+        <if test="contentType != null and contentType != '' ">content_type,</if>
+        <if test="contentTitle != null and contentTitle != ''">content_title,</if>
+        <if test="mainImage != null and mainImage != '' ">main_image,</if>
+        <if test="tags != null and tags != '' ">tags,</if>
+        <if test="publicContent != null and publicContent != '' ">public_content,</if>
+        <if test="privateContent != null and privateContent != '' ">private_content,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="contentType != null and contentType != '' ">#{contentType},</if>
+        <if test="contentTitle != null and contentTitle != ''">#{contentTitle},</if>
+        <if test="mainImage != null and mainImage != '' ">#{mainImage},</if>
+        <if test="tags != null and tags != '' ">#{tags},</if>
+        <if test="publicContent != null and publicContent != '' ">#{publicContent},</if>
+        <if test="privateContent != null and privateContent != '' ">#{privateContent},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectContentById" parameterType="Long" resultMap="BbsContentResult">
+        <include refid="selectContentVo2"/>
+        where content_id = #{content_id}
+    </select>
+
+    <update id="updateContent" parameterType="BbsContent">
+        update bbs_content
+        <set>
+            <if test="contentTitle != null and contentTitle != ''">content_title = #{contentTitle},</if>
+            <if test="contentType != null and contentType != ''">content_type = #{contentType},</if>
+            <if test="tags != null and tags != '' ">tags = #{tags},</if>
+            <if test="mainImage != null and mainImage != '' ">main_image = #{mainImage},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="publicContent != null and publicContent != '' ">public_content = #{publicContent},</if>
+            <if test="privateContent != null and privateContent != '' ">private_content = #{privateContent},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where content_id = #{contentId}
+    </update>
+
+    <delete id="deleteContentByIds" parameterType="String">
+        update bbs_content set del_flag = 1 where content_id in
+        <foreach item="contentId" collection="array" open="(" separator="," close=")">
+            #{contentId}
+        </foreach>
+    </delete>
+
+    <!-- 分页获取主题列表 -->
+    <select id="findList" parameterType="Map" resultMap="BbsContentResult">
+        <include refid="selectContentVo"/>
+        <where>
+            del_flag = 0
+            <if test="contentType != null and contentType != ''">
+                AND content_type = #{contentType}
+            </if>
+            <if test="tags != null and tags != ''">
+                AND tags = #{tags}
+            </if>
+            <if test="contentTitle != null and contentTitle !=''">
+                AND content_title like concat('%', #{contentTitle}, '%')
+            </if>
+        </where>
+        <if test="offset != null and pageSize != null">
+            limit #{offset},#{pageSize}
+        </if>
+    </select>
+    <!-- 获取符合结果的总记录数 -->
+    <select id="getTotal" parameterType="Map" resultType="Integer">
+        select count(*) from bbs_content where del_flag = 0
+        <if test="contentType != null and contentType != ''">
+            AND content_type = #{contentType}
+        </if>
+        <if test="tags != null and tags != ''">
+            AND tags = #{tags}
+        </if>
+        <if test="contentTitle != null and contentTitle !=''">
+            AND content_title like concat('%', #{contentTitle}, '%')
+        </if>
+    </select>
+</mapper>

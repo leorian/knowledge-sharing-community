@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('应用详情')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content text-center">
+    <h2 th:text="${bbsApp.appName}"></h2>
+    <img th:src="@{'/bbs/app/generateqrcode/' + ${bbsApp.appId}}"/>
+</div>
+<th:block th:include="include :: footer"/>
+</body>
+</html>

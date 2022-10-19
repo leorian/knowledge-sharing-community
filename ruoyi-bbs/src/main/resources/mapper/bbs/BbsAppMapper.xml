@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsAppMapper">
+    <resultMap type="BbsApp" id="BbsAppResult">
+        <id property="appId" column="app_id"/>
+        <result property="appName" column="app_name"/>
+        <result property="appIcon" column="app_icon"/>
+        <result property="appType" column="app_type"/>
+        <result property="appVersion" column="app_version"/>
+        <result property="introduction" column="introduction"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="account" column="account"/>
+        <result property="downloadUrl" column="download_url"/>
+        <result property="downloadTimes" column="download_times"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectAppVo">
+        select app_id, app_name, app_icon, app_type, app_version, introduction, user_id,
+         user_name, account, download_url, download_times,
+         status, del_flag, create_by, create_time, update_by, update_time, remark
+		from bbs_app
+    </sql>
+
+    <select id="selectAppList" parameterType="BbsApp" resultMap="BbsAppResult">
+        <include refid="selectAppVo"/>
+        <where>
+            del_flag = 0
+            <if test="appName != null and appName != ''">
+                AND app_name like concat('%', #{appName}, '%')
+            </if>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="account != null and account != ''">
+                AND account like concat('%', #{account}, '%')
+            </if>
+
+        </where>
+    </select>
+
+
+    <insert id="insertApp" parameterType="BbsApp">
+        insert into bbs_app (
+        <if test="appName != null and appName != '' ">app_name,</if>
+        <if test="appIcon != null and appIcon != '' ">app_icon,</if>
+        <if test="appType != null">app_type,</if>
+        <if test="appVersion != null and appVersion != ''">app_version, </if>
+        <if test="introduction != null and introduction != ''">introduction,</if>
+        <if test="userId != null">user_id,</if>
+        <if test="userName != null and userName != ''">user_name,</if>
+        <if test="account != null and account != ''">account,</if>
+        <if test="downloadUrl != null and downloadUrl != '' ">download_url,</if>
+        <if test="downloadTimes != null">download_times,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="appName != null and appName != '' ">#{appName},</if>
+        <if test="appIcon != null and appIcon != '' ">#{appIcon},</if>
+        <if test="appType != null">#{appType},</if>
+        <if test="appVersion != null and appVersion != '' ">#{appVersion},</if>
+        <if test="introduction != null and introduction != ''">#{introduction},</if>
+        <if test="userId != null">#{userId},</if>
+        <if test="userName != null and userName != ''">#{userName},</if>
+        <if test="account != null and account != ''">#{account},</if>
+        <if test="downloadUrl != null and downloadUrl != '' ">#{downloadUrl},</if>
+        <if test="downloadTimes != null">#{downloadTimes},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <select id="selectAppById" parameterType="Long" resultMap="BbsAppResult">
+        <include refid="selectAppVo"/>
+        where app_id = #{appId} and del_flag = 0
+    </select>
+
+    <update id="plusOneDownloadTimes" parameterType="Long">
+        update bbs_app set download_times = download_times+1 where app_id = #{appId};
+    </update>
+
+    <update id="updateApp" parameterType="BbsApp">
+        update bbs_app
+        <set>
+            <if test="appName != null and appName != ''">app_name = #{appName},</if>
+            <if test="appIcon != null and appIcon != ''">app_icon = #{appIcon},</if>
+            <if test="downloadUrl != null and downloadUrl !=''">download_url = #{downloadUrl},</if>
+            <if test="appVersion != null and appVersion != '' ">app_version = #{appVersion}, </if>
+            <if test="introduction != null and introduction !=''">introduction = #{introduction},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null and remark != ''">remark = #{remark},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where app_id = #{appId}
+    </update>
+
+    <delete id="deleteAppByIds" parameterType="String">
+        update bbs_app set del_flag = 1 where app_id in
+        <foreach item="appId" collection="array" open="(" separator="," close=")">
+            #{appId}
+        </foreach>
+    </delete>
+
+</mapper>

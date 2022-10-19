@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.bbs.mapper.BbsFeedbackMapper">
+    <resultMap type="BbsFeedback" id="BbsFeedbackResult">
+        <id property="feedbackId" column="feedback_id"/>
+        <result property="feedbackContent" column="feedback_content"/>
+        <result property="feedbackUserId" column="feedback_user_id"/>
+        <result property="feedbackAnswer" column="feedback_answer"/>
+        <result property="status" column="status"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <insert id="insertFeedback" parameterType="BbsFeedback">
+        insert into bbs_feedback (
+        <if test="feedbackContent != null and feedbackContent != '' ">feedback_content,</if>
+        <if test="feedbackUserId != null">feedback_user_id,</if>
+        <if test="feedbackAnswer != null and feedbackAnswer != '' ">feedback_answer,</if>
+        <if test="status != null ">status,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        <if test="delFlag != null ">del_flag,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="updateBy != null and updateBy != ''">update_by,</if>
+        create_time,
+        update_time
+        )values(
+        <if test="feedbackContent != null and feedbackContent != '' ">#{feedbackContent},</if>
+        <if test="feedbackUserId != null">#{feedbackUserId},</if>
+        <if test="feedbackAnswer != null and feedbackAnswer != '' ">#{feedbackAnswer},</if>
+        <if test="status != null ">#{status},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        <if test="delFlag != null">#{delFlag},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="updateBy != null and updateBy != ''">#{updateBy},</if>
+        sysdate(),
+        sysdate()
+        )
+    </insert>
+
+    <!-- 分页获取主题列表 -->
+    <select id="findList" parameterType="Map" resultMap="BbsFeedbackResult">
+        select * from bbs_feedback
+        <where>
+            del_flag = 0
+            <if test="feedbackUserId != null">
+                AND feedback_user_id = #{feedbackUserId}
+            </if>
+        </where>
+        <if test="offset != null and pageSize != null">
+            limit #{offset},#{pageSize}
+        </if>
+    </select>
+    <!-- 获取符合结果的总记录数 -->
+    <select id="getTotal" parameterType="Map" resultType="Integer">
+        select count(*) from bbs_feedback where del_flag = 0
+        <if test="feedbackUserId != null">
+            AND feedback_user_id = #{feedbackUserId}
+        </if>
+    </select>
+
+    <select id="selectFeedbackList" parameterType="BbsFeedback" resultMap="BbsFeedbackResult">
+        select * from bbs_feedback
+        <where>
+            del_flag = 0
+            <if test="feedbackContent != null and feedbackContent != ''">
+                AND feedback_content like concat('%', #{feedbackContent}, '%')
+            </if>
+            <if test="feedbackUserId != null and feedbackUserId !=''">
+                AND feedback_user_id = #{feedbackUserId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectFeedbackById" parameterType="java.lang.Long" resultMap="BbsFeedbackResult">
+        select * from bbs_feedback where feedback_id = #{feedbackId}
+    </select>
+
+    <update id="updateFeedback" parameterType="BbsFeedback">
+        update bbs_feedback
+        <set>
+            <if test="feedbackContent != null and feedbackContent != ''">feedback_content = #{feedbackContent},</if>
+            <if test="feedbackUserId != null">feedback_user_id = #{feedbackUserId},</if>
+            <if test="feedbackAnswer != null and feedbackAnswer != '' ">feedback_answer = #{feedbackAnswer},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where feedback_id = #{feedbackId}
+    </update>
+
+    <delete id="deleteFeedbackByIds" parameterType="String">
+        update bbs_feedback set del_flag = 1 where feedback_id in
+        <foreach item="feedbackId" collection="array" open="(" separator="," close=")">
+            #{feedbackId}
+        </foreach>
+    </delete>
+</mapper>
